@@ -31,7 +31,9 @@
             "polyfills": [
               "zone.js",
               "zone.js/testing"
-            ]
+            ],
+            "karmaConfig": "projects/ngx-net-http/karma.conf.js",
+            "codeCoverage": true
           }
         }
       }
