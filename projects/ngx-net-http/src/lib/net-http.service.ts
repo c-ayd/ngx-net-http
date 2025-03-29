@@ -21,10 +21,6 @@ export class NetHttpService {
     if (baseUrl == undefined)
       throw new NetHttpInvalidUrl('Please define a base URL for the Net HTTP service in DI or a base URL in the request');
 
-    if (baseUrl.endsWith('/')) {
-      baseUrl = baseUrl.slice(0, baseUrl.length - 1);
-    }
-
     let url = baseUrl;
 
     if (request?.controller) {

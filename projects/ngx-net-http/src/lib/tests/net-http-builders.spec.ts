@@ -94,7 +94,7 @@ describe('NetHttpService without a base URL in DI', () => {
 
   it('When request parameters are given to the build URL method, it should return the correct URL', () => {
     const { baseUrl, url } = service['buildUrl']({
-      baseUrl: 'test/',
+      baseUrl: 'test',
       controller: 'api',
       routes: ['string', 123, true]
     });
