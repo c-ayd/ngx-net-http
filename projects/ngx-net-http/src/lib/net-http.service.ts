@@ -2,6 +2,8 @@ import { Inject, Injectable, Optional } from '@angular/core';
 import { NetHttpRequest } from './interfaces/net-http-request';
 import { NetHttpInvalidUrl } from './errors/net-http-invalid-url';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { NetHttpResponseType } from './enums/net-http-response-type';
+import { NetHttpCallbacks } from './interfaces/net-http-callbacks';
 
 @Injectable({
   providedIn: 'root'
@@ -65,7 +67,7 @@ export class NetHttpService {
   private mergeHeaders(currentHeaders: Record<string, string | string[]>, headers?: Record<string, string | string[]>): void {
     if (headers == undefined)
       return;
-
+    
     for (const [key, value] of Object.entries(headers)) {
       currentHeaders[key] = value;
     }
@@ -88,6 +90,17 @@ export class NetHttpService {
     }
 
     return queryParams;
+  }
+
+  private buildOptions<T>(baseUrl: string, request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>): {} {
+    return {
+      responseType: request?.responseType ?? NetHttpResponseType.Json,
+      reportProgress: callbacks && (callbacks.uploadProgress || callbacks.downloadProgress) ? true : false,
+      params: this.buildQueryParams(request),
+      headers: this.buildHeaders(baseUrl, request),
+      withCredentials: request?.withCredentials,
+      context: request?.options?.context,
+    };
   }
 
   /**

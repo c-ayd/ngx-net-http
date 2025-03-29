@@ -1,9 +1,10 @@
 import { TestBed } from "@angular/core/testing";
 import { NetHttpService } from "../net-http.service";
 import { InjectionToken } from "@angular/core";
-import { HttpClient, provideHttpClient } from "@angular/common/http";
+import { HttpClient, HttpContext, provideHttpClient } from "@angular/common/http";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
 import { NetHttpInvalidUrl } from "../errors/net-http-invalid-url";
+import { NetHttpResponseType } from "../enums/net-http-response-type";
 
 describe('NetHttpService Builders', () => {
   const BASE_URL_TOKEN = new InjectionToken<string>('NET_HTTP_BASE_URL');
@@ -102,6 +103,48 @@ describe('NetHttpService Builders', () => {
 
     // Assert
     expect(queryParams == undefined).withContext('Query parameters are undefined').toBeTrue();
+  });
+
+  it('When request parameters and callbacks are given to the build options method, it should return the correct options', () => {
+    // Arrange
+    service.addHeadersToUrl(BASE_URL, {
+      key1: 'value1'
+    });
+    service.addHeadersToUrl('test', {
+      key2: 'value2',
+    });
+    service.addGlobalHeaders({
+      key3: 'value3'
+    });
+
+    // Act
+    const options = service['buildOptions'](BASE_URL, {
+      responseType: NetHttpResponseType.Blob,
+      queryParams: {
+        page: 1,
+        size: 20
+      },
+      headers: {
+        Authentication: 'Bearer ABCD'
+      },
+      withCredentials: true,
+      options: {
+        context: new HttpContext()
+      }
+    }, {
+      downloadProgress: (loaded: number, total?: number) => { }
+    });
+
+    // Assert
+    expect((<any>options)['responseType']).toBe('blob');
+    expect((<any>options)['reportProgress']).withContext('Report progress is activated').toBeTrue();
+    expect((<any>options)['params'].get('page')).toBe('1');
+    expect((<any>options)['params'].get('size')).toBe('20');
+    expect((<any>options)['headers'].get('key1')).toBe('value1');
+    expect((<any>options)['headers'].get('key3')).toBe('value3');
+    expect((<any>options)['headers'].get('Authentication')).toBe('Bearer ABCD');
+    expect((<any>options)['withCredentials']).withContext('Credentials will be sent').toBeTrue();
+    expect((<any>options)['context'] != undefined).withContext('Context is not undefined').toBeTrue();
   });
 });
 
