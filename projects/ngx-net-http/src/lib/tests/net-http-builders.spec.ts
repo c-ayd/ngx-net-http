@@ -33,6 +33,49 @@ describe('NetHttpService Builders', () => {
     expect(baseUrl).toBe(BASE_URL);
     expect(url).toBe(BASE_URL + '/api/string/123/true');
   });
+
+  it('When request parameters are given to the build headers method and there are also defined header settings, it should return the correct headers', () => {
+    // Arrange
+    service.addHeadersToUrl(BASE_URL, {
+      key1: 'value1'
+    });
+    service.addHeadersToUrl(BASE_URL, {
+      key2: 'value2'
+    });
+    service.addHeadersToUrl('test', {
+      key3: 'value3',
+    });
+    service.addGlobalHeaders({
+      key4: 'value4'
+    });
+    service.addGlobalHeaders({
+      key5: 'value5'
+    });
+
+    // Act
+    const headers = service['buildHeaders'](BASE_URL, {
+      headers: {
+        key6: 'value6'
+      }
+    });
+
+    // Assert
+    expect(headers != undefined).withContext('Headers are not undefined').toBeTrue();
+    expect(headers!.get('key1')).toBe('value1');
+    expect(headers!.get('key2')).toBe('value2');
+    expect(headers!.get('key4')).toBe('value4');
+    expect(headers!.get('key5')).toBe('value5');
+    expect(headers!.get('key6')).toBe('value6');
+    expect(headers!.get('key3') == null).withContext('Headers do not have key3').toBeTrue();
+  });
+
+  it('When request parameters are given to build headers method and there is no headers, it should return undefined', () => {
+    // Act
+    const headers = service['buildHeaders'](BASE_URL, {});
+
+    // Assert
+    expect(headers == undefined).withContext('Headers are undefined').toBeTrue();
+  });
 });
 
 describe('NetHttpService without a base URL in DI', () => {

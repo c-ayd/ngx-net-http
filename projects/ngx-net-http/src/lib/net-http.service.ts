@@ -48,6 +48,33 @@ export class NetHttpService {
     };
   }
 
+  private buildHeaders(baseUrl: string, request?: Partial<NetHttpRequest>): HttpHeaders | undefined {
+    let headers: Record<string, string | string[]> = {};
+    if (this.headerSettings.has('*')) {
+      this.mergeHeaders(headers, this.headerSettings.get('*'));
+    }
+    if (this.headerSettings.has(baseUrl)) {
+      this.mergeHeaders(headers, this.headerSettings.get(baseUrl));
+    }
+    if (request?.headers) {
+      this.mergeHeaders(headers, request.headers);
+    }
+
+    if (Object.entries(headers).length == 0)
+      return undefined;
+
+    return new HttpHeaders(headers);
+  }
+
+  private mergeHeaders(currentHeaders: Record<string, string | string[]>, headers?: Record<string, string | string[]>): void {
+    if (headers == undefined)
+      return;
+
+    for (const [key, value] of Object.entries(headers)) {
+      currentHeaders[key] = value;
+    }
+  }
+
   /**
    * Configures headers for a specific URL, so that when an HTTP request is sent to that URL, the headers are added automatically.
    * @param baseUrl URL to which the headers will be added.
