@@ -1,7 +1,7 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { NetHttpRequest } from './interfaces/net-http-request';
 import { NetHttpInvalidUrl } from './errors/net-http-invalid-url';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +69,25 @@ export class NetHttpService {
     for (const [key, value] of Object.entries(headers)) {
       currentHeaders[key] = value;
     }
+  }
+
+  private buildQueryParams(request?: Partial<NetHttpRequest>): HttpParams | undefined {
+    if (request?.queryParams == undefined)
+      return undefined;
+
+    let queryParams: HttpParams = new HttpParams();
+    for (const [key, params] of Object.entries(request.queryParams)) {
+      if (params instanceof Array) {
+        for (const param of params) {
+          queryParams = queryParams.append(`${key}`, param);
+        }
+      }
+      else {
+        queryParams = queryParams.set(key, params);
+      }
+    }
+
+    return queryParams;
   }
 
   /**

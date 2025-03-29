@@ -76,7 +76,40 @@ describe('NetHttpService Builders', () => {
     // Assert
     expect(headers == undefined).withContext('Headers are undefined').toBeTrue();
   });
+
+  it('When request parameters are given to the build query parameters method, it should return the correct query parameters', () => {
+    // Act
+    const queryParams = service['buildQueryParams']({
+      queryParams: {
+        key1: 'value1',
+        key2: 123,
+        key3: true,
+        key4: ['value2', 456, true, false]
+      }
+    });
+
+    // Assert
+    expect(queryParams != undefined).withContext('Query params are not undefined').toBeTrue();
+    expect(queryParams!.get('key1')).toBe('value1');
+    expect(queryParams!.get('key2')).toBe('123');
+    expect(queryParams!.get('key3')).toBe('true');
+    expect(queryParams!.getAll('key4')).toEqual(['value2', '456', 'true', 'false']);
+  });
+
+  it('When request parameters are given to the build query parameters method and there is no query parameters, it should return undefined', () => {
+    // Act
+    const queryParams = service['buildQueryParams']({});
+
+    // Assert
+    expect(queryParams == undefined).withContext('Query parameters are undefined').toBeTrue();
+  });
 });
+
+/**
+ * 
+ * 
+ * 
+ */
 
 describe('NetHttpService without a base URL in DI', () => {
   let service: NetHttpService;
