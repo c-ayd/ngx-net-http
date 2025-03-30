@@ -55,19 +55,31 @@ export interface NetHttpRequest {
      */
     options?: {
         /**
-         * If defined, it will automatically start downloading the response body.
+         * If defined or true, it will automatically start downloading the response body.
+         * @default mimeType 'application/octet-stream'
+         * @default fileName 'file' without an extension
          */
         download?: {
             /**
-             * Type of the data. Default is ```application/octet-stream```.
+             * Type of the data.
              */
             mimeType?: string,
             /**
-             * Name of the file with its extension. Default is ```file``` without an extension.
+             * Name of the file with its extension.
              * @example 'pic.png'
              */
             fileName?: string
-        },
+        } | boolean,
+        /**
+         * If defined or true, it will automatically open the response body in a new tab.
+         * @default mimeType 'text/plain'
+         */
+        openFile?: {
+            /**
+             * Type of the data.
+             */
+            mimeType?: string
+        } | boolean,
         /**
          * This property accepts either a boolean to enable/disable transferring cache for eligible
          * requests performed using `HttpClient`, or an object, which allows to configure cache

@@ -486,4 +486,294 @@ describe('NetHttpService GET', () => {
     expect(downloadProgressResult).withContext('downloadProgress has correct parameter').toBeTrue();
     expect(onErrorCalled).withContext('onError is not called').toBeFalse();
   });
+
+  it('When download is given as a true boolean while providing all callbacks, it should start downloading the file and invoke all callbacks, except the error callback', () => {
+    // Arrange
+    let onRequestSentCalled = false;
+    let onReceivedResponseHeaderCalled = false;
+    let onReceivedResponseHeaderResult = false;
+    let onReceivedResponseCalled = false;
+    let onReceivedResponseResult = false;
+    let onReceivedBodyCalled = false;
+    let onReceivedBodyResult = false;
+    let onRequestCompletedCalled = false;
+    let downloadProgressCalled = false;
+    let downloadProgressResult = false;
+    let onErrorCalled = false;
+
+    // Act
+    const subscription = service.get<JsonTestResult>({
+      options: {
+        download: true
+      }
+    }, {
+      onRequestSent: () => {
+        onRequestSentCalled = true;
+      },
+      onReceivedResponseHeader: (headerResponse: NetHttpHeaderResponse) => {
+        onReceivedResponseHeaderCalled = true;
+        onReceivedResponseHeaderResult = headerResponse.headers!.get('TestHeader') === 'test';
+      },
+      onReceivedResponse: (response: NetHttpResponse<JsonTestResult>) => {
+        onReceivedResponseCalled = true;
+        onReceivedResponseResult = response.headers!.get('TestHeader') === 'test' &&
+          response.body!.key1 === 'result' &&
+          response.body!.key2 === 123 &&
+          response.body!.key3 === true &&
+          response.body!.key4['key4.1'] === 456;
+      },
+      onReceivedBody: (body: JsonTestResult) => {
+        onReceivedBodyCalled = true;
+        onReceivedBodyResult = body.key1 === 'result' &&
+          body.key2 === 123 &&
+          body.key3 === true &&
+          body.key4['key4.1'] === 456;
+      },
+      onRequestCompleted: () => {
+        onRequestCompletedCalled = true;
+      },
+      downloadProgress: (loaded: number, total?: number) => {
+        downloadProgressCalled = true;
+        downloadProgressResult = loaded == 50 && total == 100;
+      },
+      onError: (error: any) => {
+        onErrorCalled = true;
+      }
+    });
+
+    const request = TestBed.inject(HttpTestingController).expectOne(BASE_URL);
+    const responseHeaderEvent: HttpEvent<JsonTestResult> = new HttpHeaderResponse({
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+    const downloadProgressEvent: HttpProgressEvent = {
+      type: HttpEventType.DownloadProgress,
+      loaded: 50,
+      total: 100
+    };
+    expect(request.request.method).toBe('GET');
+    request.event(responseHeaderEvent);
+    request.event(downloadProgressEvent);
+    request.flush({
+      key1: 'result',
+      key2: 123,
+      key3: true,
+      key4: {
+        'key4.1': 456
+      }
+    }, {
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+
+    // Assert
+    expect(subscription != null).withContext('Subscription is not null nor undefined').toBeTrue();
+    expect(onRequestSentCalled).withContext('onRequestSent is called').toBeTrue();
+    expect(onReceivedResponseHeaderCalled).withContext('onReceivedResponseHeader is called').toBeTrue();
+    expect(onReceivedResponseHeaderResult).withContext('onReceivedResponseHeader has correct parameter').toBeTrue();
+    expect(onReceivedResponseCalled).withContext('onReceivedResponse is called').toBeTrue();
+    expect(onReceivedResponseResult).withContext('onReceivedResponse has correct parameter').toBeTrue();
+    expect(onReceivedBodyCalled).withContext('onReceivedBody is called').toBeTrue();
+    expect(onReceivedBodyResult).withContext('onReceivedBody has correct parameter').toBeTrue();
+    expect(onRequestCompletedCalled).withContext('onRequestCompleted is called').toBeTrue();
+    expect(downloadProgressCalled).withContext('downloadProgress is called').toBeTrue();
+    expect(downloadProgressResult).withContext('downloadProgress has correct parameter').toBeTrue();
+    expect(onErrorCalled).withContext('onError is not called').toBeFalse();
+  });
+
+  it('When a file is opened in a new tab while providing a MIME type and all callbacks, it should open the file in a new tab and invoke all callbacks, except the error callback', () => {
+    // Arrange
+    let onRequestSentCalled = false;
+    let onReceivedResponseHeaderCalled = false;
+    let onReceivedResponseHeaderResult = false;
+    let onReceivedResponseCalled = false;
+    let onReceivedResponseResult = false;
+    let onReceivedBodyCalled = false;
+    let onReceivedBodyResult = false;
+    let onRequestCompletedCalled = false;
+    let downloadProgressCalled = false;
+    let downloadProgressResult = false;
+    let onErrorCalled = false;
+
+    // Act
+    const subscription = service.get<JsonTestResult>({
+      options: {
+        openFile: {
+          mimeType: 'application/pdf',
+        }
+      }
+    }, {
+      onRequestSent: () => {
+        onRequestSentCalled = true;
+      },
+      onReceivedResponseHeader: (headerResponse: NetHttpHeaderResponse) => {
+        onReceivedResponseHeaderCalled = true;
+        onReceivedResponseHeaderResult = headerResponse.headers!.get('TestHeader') === 'test';
+      },
+      onReceivedResponse: (response: NetHttpResponse<JsonTestResult>) => {
+        onReceivedResponseCalled = true;
+        onReceivedResponseResult = response.headers!.get('TestHeader') === 'test' &&
+          response.body!.key1 === 'result' &&
+          response.body!.key2 === 123 &&
+          response.body!.key3 === true &&
+          response.body!.key4['key4.1'] === 456;
+      },
+      onReceivedBody: (body: JsonTestResult) => {
+        onReceivedBodyCalled = true;
+        onReceivedBodyResult = body.key1 === 'result' &&
+          body.key2 === 123 &&
+          body.key3 === true &&
+          body.key4['key4.1'] === 456;
+      },
+      onRequestCompleted: () => {
+        onRequestCompletedCalled = true;
+      },
+      downloadProgress: (loaded: number, total?: number) => {
+        downloadProgressCalled = true;
+        downloadProgressResult = loaded == 50 && total == 100;
+      },
+      onError: (error: any) => {
+        onErrorCalled = true;
+      }
+    });
+
+    const request = TestBed.inject(HttpTestingController).expectOne(BASE_URL);
+    const responseHeaderEvent: HttpEvent<JsonTestResult> = new HttpHeaderResponse({
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+    const downloadProgressEvent: HttpProgressEvent = {
+      type: HttpEventType.DownloadProgress,
+      loaded: 50,
+      total: 100
+    };
+    expect(request.request.method).toBe('GET');
+    request.event(responseHeaderEvent);
+    request.event(downloadProgressEvent);
+    request.flush({
+      key1: 'result',
+      key2: 123,
+      key3: true,
+      key4: {
+        'key4.1': 456
+      }
+    }, {
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+
+    // Assert
+    expect(subscription != null).withContext('Subscription is not null nor undefined').toBeTrue();
+    expect(onRequestSentCalled).withContext('onRequestSent is called').toBeTrue();
+    expect(onReceivedResponseHeaderCalled).withContext('onReceivedResponseHeader is called').toBeTrue();
+    expect(onReceivedResponseHeaderResult).withContext('onReceivedResponseHeader has correct parameter').toBeTrue();
+    expect(onReceivedResponseCalled).withContext('onReceivedResponse is called').toBeTrue();
+    expect(onReceivedResponseResult).withContext('onReceivedResponse has correct parameter').toBeTrue();
+    expect(onReceivedBodyCalled).withContext('onReceivedBody is called').toBeTrue();
+    expect(onReceivedBodyResult).withContext('onReceivedBody has correct parameter').toBeTrue();
+    expect(onRequestCompletedCalled).withContext('onRequestCompleted is called').toBeTrue();
+    expect(downloadProgressCalled).withContext('downloadProgress is called').toBeTrue();
+    expect(downloadProgressResult).withContext('downloadProgress has correct parameter').toBeTrue();
+    expect(onErrorCalled).withContext('onError is not called').toBeFalse();
+  });
+
+  it('When a file is opened in a new tab while providing no MIME type and all callbacks, it should open the file in a new tab and invoke all callbacks, except the error callback', () => {
+    // Arrange
+    let onRequestSentCalled = false;
+    let onReceivedResponseHeaderCalled = false;
+    let onReceivedResponseHeaderResult = false;
+    let onReceivedResponseCalled = false;
+    let onReceivedResponseResult = false;
+    let onReceivedBodyCalled = false;
+    let onReceivedBodyResult = false;
+    let onRequestCompletedCalled = false;
+    let downloadProgressCalled = false;
+    let downloadProgressResult = false;
+    let onErrorCalled = false;
+
+    // Act
+    const subscription = service.get<JsonTestResult>({
+      options: {
+        openFile: true
+      }
+    }, {
+      onRequestSent: () => {
+        onRequestSentCalled = true;
+      },
+      onReceivedResponseHeader: (headerResponse: NetHttpHeaderResponse) => {
+        onReceivedResponseHeaderCalled = true;
+        onReceivedResponseHeaderResult = headerResponse.headers!.get('TestHeader') === 'test';
+      },
+      onReceivedResponse: (response: NetHttpResponse<JsonTestResult>) => {
+        onReceivedResponseCalled = true;
+        onReceivedResponseResult = response.headers!.get('TestHeader') === 'test' &&
+          response.body!.key1 === 'result' &&
+          response.body!.key2 === 123 &&
+          response.body!.key3 === true &&
+          response.body!.key4['key4.1'] === 456;
+      },
+      onReceivedBody: (body: JsonTestResult) => {
+        onReceivedBodyCalled = true;
+        onReceivedBodyResult = body.key1 === 'result' &&
+          body.key2 === 123 &&
+          body.key3 === true &&
+          body.key4['key4.1'] === 456;
+      },
+      onRequestCompleted: () => {
+        onRequestCompletedCalled = true;
+      },
+      downloadProgress: (loaded: number, total?: number) => {
+        downloadProgressCalled = true;
+        downloadProgressResult = loaded == 50 && total == 100;
+      },
+      onError: (error: any) => {
+        onErrorCalled = true;
+      }
+    });
+
+    const request = TestBed.inject(HttpTestingController).expectOne(BASE_URL);
+    const responseHeaderEvent: HttpEvent<JsonTestResult> = new HttpHeaderResponse({
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+    const downloadProgressEvent: HttpProgressEvent = {
+      type: HttpEventType.DownloadProgress,
+      loaded: 50,
+      total: 100
+    };
+    expect(request.request.method).toBe('GET');
+    request.event(responseHeaderEvent);
+    request.event(downloadProgressEvent);
+    request.flush({
+      key1: 'result',
+      key2: 123,
+      key3: true,
+      key4: {
+        'key4.1': 456
+      }
+    }, {
+      headers: new HttpHeaders({
+        'TestHeader': 'test'
+      })
+    });
+
+    // Assert
+    expect(subscription != null).withContext('Subscription is not null nor undefined').toBeTrue();
+    expect(onRequestSentCalled).withContext('onRequestSent is called').toBeTrue();
+    expect(onReceivedResponseHeaderCalled).withContext('onReceivedResponseHeader is called').toBeTrue();
+    expect(onReceivedResponseHeaderResult).withContext('onReceivedResponseHeader has correct parameter').toBeTrue();
+    expect(onReceivedResponseCalled).withContext('onReceivedResponse is called').toBeTrue();
+    expect(onReceivedResponseResult).withContext('onReceivedResponse has correct parameter').toBeTrue();
+    expect(onReceivedBodyCalled).withContext('onReceivedBody is called').toBeTrue();
+    expect(onReceivedBodyResult).withContext('onReceivedBody has correct parameter').toBeTrue();
+    expect(onRequestCompletedCalled).withContext('onRequestCompleted is called').toBeTrue();
+    expect(downloadProgressCalled).withContext('downloadProgress is called').toBeTrue();
+    expect(downloadProgressResult).withContext('downloadProgress has correct parameter').toBeTrue();
+    expect(onErrorCalled).withContext('onError is not called').toBeFalse();
+  });
 });

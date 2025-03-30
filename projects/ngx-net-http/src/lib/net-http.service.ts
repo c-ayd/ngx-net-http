@@ -135,7 +135,10 @@ export class NetHttpService {
             callbacks.onRequestCompleted?.();
 
             if (request?.options?.download) {
-              this.startDownload(httpEvent.body, request.options.download.mimeType, request.options.download.fileName);
+              this.startDownload(httpEvent.body, request.options.download);
+            }
+            if (request?.options?.openFile) {
+              this.openFile(httpEvent.body, request.options.openFile);
             }
             break;
           }
@@ -151,23 +154,38 @@ export class NetHttpService {
     return {
       next: (value: T) => {
         if (request?.options?.download) {
-          this.startDownload(value, request.options.download.mimeType, request.options.download.fileName);
+          this.startDownload(value, request.options.download);
+        }
+        if (request?.options?.openFile) {
+          this.openFile(value, request.options.openFile);
         }
       }
     };
   }
 
-  private startDownload(data: any, type?: string, fileName?: string) {
+  private startDownload(data: any, download: { mimeType?: string, fileName?: string} | boolean) {
+    const type = typeof download != 'boolean' && download.mimeType ? download.mimeType : 'application/octet-stream';
+    const fileName = typeof download != 'boolean' && download.fileName ? download.fileName : 'file';
+
     const blob = new Blob([data], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
 
     a.href = url;
-    a.download = fileName ?? 'file';
+    a.download = fileName;
     a.click();
 
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  private openFile(data: any, openFile: { mimeType?: string } | boolean) {
+    const type = typeof openFile != 'boolean' && openFile.mimeType ? openFile.mimeType : 'text/plain';
+
+    const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+    
+    window.open(url, '_blank');
   }
 
   private addSubscription(subscription: Subscription, group?: string | Object): void {
