@@ -224,6 +224,22 @@ export class NetHttpService {
   }
 
   /**
+   * Sends an HTTP ```PATCH``` request.
+   * @param request HTTP request parameters.
+   * @param callbacks Functions to be invoked when the response is received.
+   * @returns ```Subscription``` object of the request.
+   */
+  patch<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+    const { baseUrl, url } = this.buildUrl(request);
+    const options = this.buildOptions(baseUrl, request, callbacks);
+
+    const subscription = this.http.request<T>(new HttpRequest<T>('PATCH', url, request?.body, options))
+      .subscribe(this.handleHttpEvent(request, callbacks));
+
+    return subscription;
+  }
+
+  /**
    * Configures headers for a specific URL, so that when an HTTP request is sent to that URL, the headers are added automatically.
    * @param baseUrl URL to which the headers will be added.
    * @param headers Headers to be added.
