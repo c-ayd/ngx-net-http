@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@angular/core';
-import { NetHttpRequest } from './interfaces/net-http-request';
+import { NetHttpRequest, NetHttpRequestWithBody } from './interfaces/net-http-request';
 import { NetHttpInvalidUrl } from './errors/net-http-invalid-url';
 import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { NetHttpResponseType } from './enums/net-http-response-type';
@@ -183,6 +183,25 @@ export class NetHttpService {
     }
 
     const subscription = this.http.request<T>(new HttpRequest<T>('GET', url, options))
+      .subscribe(this.handleHttpEvent(request, callbacks));
+
+    return subscription;
+  }
+
+  /**
+   * Sends an HTTP ```POST``` request.
+   * @param request HTTP request parameters.
+   * @param callbacks Functions to be invoked when the response is received.
+   * @returns ```Subscription``` object of the request.
+   */
+  post<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+    const { baseUrl, url } = this.buildUrl(request);
+    const options = {
+      ...this.buildOptions(baseUrl, request, callbacks),
+      transferCache: request?.options?.transferCache,
+    }
+
+    const subscription = this.http.request<T>(new HttpRequest<T>('POST', url, request?.body, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
     return subscription;
