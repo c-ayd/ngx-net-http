@@ -1,9 +1,11 @@
 import { Inject, Injectable, Optional } from '@angular/core';
 import { NetHttpRequest } from './interfaces/net-http-request';
 import { NetHttpInvalidUrl } from './errors/net-http-invalid-url';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { NetHttpResponseType } from './enums/net-http-response-type';
 import { NetHttpCallbacks } from './interfaces/net-http-callbacks';
+import { Observer, Subscription } from 'rxjs';
+import { toNetHttpHeaderResponse, toNetHttpResponse } from './interfaces/net-http-response';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,7 @@ export class NetHttpService {
     @Optional() @Inject('NET_HTTP_BASE_URL') private baseUrl: string | null
   ) { }
 
-  private buildUrl(request: Partial<NetHttpRequest>): {
+  private buildUrl(request?: Partial<NetHttpRequest>): {
     baseUrl: string,
     url: string,
   } {
@@ -101,6 +103,89 @@ export class NetHttpService {
       withCredentials: request?.withCredentials,
       context: request?.options?.context,
     };
+  }
+
+  private handleHttpEvent<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>): Partial<Observer<HttpEvent<T>>> {
+    if (callbacks == undefined)
+      return this.handleNoCallback(request);
+
+    return {
+      next: (httpEvent: HttpEvent<any>) => {
+        switch (httpEvent.type) {
+          case (HttpEventType.Sent): {
+            callbacks.onRequestSent?.();
+            break;
+          }
+          case (HttpEventType.ResponseHeader): {
+            callbacks.onReceivedResponseHeader?.(toNetHttpHeaderResponse(httpEvent));
+            break;
+          }
+          case (HttpEventType.UploadProgress): {
+            callbacks.uploadProgress?.(httpEvent.loaded, httpEvent.total);
+            break;
+          }
+          case (HttpEventType.DownloadProgress): {
+            callbacks.downloadProgress?.(httpEvent.loaded, httpEvent.total);
+            break;
+          }
+          case (HttpEventType.Response): {
+            callbacks.onReceivedResponse?.(toNetHttpResponse(httpEvent));
+            callbacks.onReceivedBody?.(httpEvent.body);
+            callbacks.onRequestCompleted?.();
+
+            if (request?.options?.download) {
+              this.startDownload(httpEvent.body, request.options.download.mimeType, request.options.download.fileName);
+            }
+            break;
+          }
+        }
+      },
+      error: (error: any) => {
+        callbacks.onError?.(error);
+      }
+    };
+  }
+
+  private handleNoCallback<T>(request?: Partial<NetHttpRequest>): Partial<Observer<T>> {
+    return {
+      next: (value: T) => {
+        if (request?.options?.download) {
+          this.startDownload(value, request.options.download.mimeType, request.options.download.fileName);
+        }
+      }
+    };
+  }
+
+  private startDownload(data: any, type?: string, fileName?: string) {
+    const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = fileName ?? 'file';
+    a.click();
+
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Sends an HTTP ```GET``` request.
+   * @param request HTTP request parameters.
+   * @param callbacks Functions to be invoked when the response is received.
+   * @returns ```Subscription``` object of the request.
+   */
+  get<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+    const { baseUrl, url } = this.buildUrl(request);
+    const options = {
+      ...this.buildOptions(baseUrl, request, callbacks),
+      transferCache: request?.options?.transferCache,
+    }
+
+    const subscription = this.http.request<T>(new HttpRequest<T>('GET', url, options))
+      .subscribe(this.handleHttpEvent(request, callbacks));
+
+    return subscription;
   }
 
   /**
