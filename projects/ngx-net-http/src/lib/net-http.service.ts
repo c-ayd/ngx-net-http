@@ -12,6 +12,7 @@ import { toNetHttpHeaderResponse, toNetHttpResponse } from './interfaces/net-htt
 })
 export class NetHttpService {
   private headerSettings = new Map<string, Record<string, string | string[]>>();
+  private groupedSubscriptions = new Map<string | Object, Subscription[]>();
 
   constructor(private http: HttpClient,
     @Optional() @Inject('NET_HTTP_BASE_URL') private baseUrl: string | null
@@ -169,13 +170,26 @@ export class NetHttpService {
     URL.revokeObjectURL(url);
   }
 
+  private addSubscription(subscription: Subscription, group?: string | Object): void {
+    if (group == undefined)
+      return;
+
+    if (this.groupedSubscriptions.has(group)) {
+      this.groupedSubscriptions.get(group)!.push(subscription);
+    }
+    else {
+      this.groupedSubscriptions.set(group, [subscription]);
+    }
+  }
+
   /**
    * Sends an HTTP ```GET``` request.
    * @param request HTTP request parameters.
    * @param callbacks Functions to be invoked when the response is received.
-   * @returns ```Subscription``` object of the request.
+   * @param group Group to which the subsription is to be added.
+   * @returns ```Subscription``` object of the request. If a group is specified, it can be handled via ```clearSubscription``` or ```clearAllSubscriptions``` functions. Otherwise it can be handled manually.
    */
-  get<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+  get<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>, group?: string | Object): Subscription {
     const { baseUrl, url } = this.buildUrl(request);
     const options = {
       ...this.buildOptions(baseUrl, request, callbacks),
@@ -185,6 +199,7 @@ export class NetHttpService {
     const subscription = this.http.request<T>(new HttpRequest<T>('GET', url, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
+    this.addSubscription(subscription, group);
     return subscription;
   }
 
@@ -192,9 +207,10 @@ export class NetHttpService {
    * Sends an HTTP ```POST``` request.
    * @param request HTTP request parameters.
    * @param callbacks Functions to be invoked when the response is received.
-   * @returns ```Subscription``` object of the request.
+   * @param group Group to which the subsription is to be added.
+   * @returns ```Subscription``` object of the request. If a group is specified, it can be handled via ```clearSubscription``` or ```clearAllSubscriptions``` functions. Otherwise it can be handled manually.
    */
-  post<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+  post<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>, group?: string | Object): Subscription {
     const { baseUrl, url } = this.buildUrl(request);
     const options = {
       ...this.buildOptions(baseUrl, request, callbacks),
@@ -204,6 +220,7 @@ export class NetHttpService {
     const subscription = this.http.request<T>(new HttpRequest<T>('POST', url, request?.body, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
+    this.addSubscription(subscription, group);
     return subscription;
   }
 
@@ -211,15 +228,17 @@ export class NetHttpService {
    * Sends an HTTP ```PUT``` request.
    * @param request HTTP request parameters.
    * @param callbacks Functions to be invoked when the response is received.
-   * @returns ```Subscription``` object of the request.
+   * @param group Group to which the subsription is to be added.
+   * @returns ```Subscription``` object of the request. If a group is specified, it can be handled via ```clearSubscription``` or ```clearAllSubscriptions``` functions. Otherwise it can be handled manually.
    */
-  put<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+  put<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>, group?: string | Object): Subscription {
     const { baseUrl, url } = this.buildUrl(request);
     const options = this.buildOptions(baseUrl, request, callbacks);
 
     const subscription = this.http.request<T>(new HttpRequest<T>('PUT', url, request?.body, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
+    this.addSubscription(subscription, group);
     return subscription;
   }
 
@@ -227,15 +246,17 @@ export class NetHttpService {
    * Sends an HTTP ```PATCH``` request.
    * @param request HTTP request parameters.
    * @param callbacks Functions to be invoked when the response is received.
-   * @returns ```Subscription``` object of the request.
+   * @param group Group to which the subsription is to be added.
+   * @returns ```Subscription``` object of the request. If a group is specified, it can be handled via ```clearSubscription``` or ```clearAllSubscriptions``` functions. Otherwise it can be handled manually.
    */
-  patch<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+  patch<T>(request?: Partial<NetHttpRequestWithBody>, callbacks?: Partial<NetHttpCallbacks<T>>, group?: string | Object): Subscription {
     const { baseUrl, url } = this.buildUrl(request);
     const options = this.buildOptions(baseUrl, request, callbacks);
 
     const subscription = this.http.request<T>(new HttpRequest<T>('PATCH', url, request?.body, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
+    this.addSubscription(subscription, group);
     return subscription;
   }
 
@@ -243,15 +264,17 @@ export class NetHttpService {
    * Sends an HTTP ```DELETE``` request.
    * @param request HTTP request parameters.
    * @param callbacks Functions to be invoked when the response is received.
-   * @returns ```Subscription``` object of the request.
+   * @param group Group to which the subsription is to be added.
+   * @returns ```Subscription``` object of the request. If a group is specified, it can be handled via ```clearSubscription``` or ```clearAllSubscriptions``` functions. Otherwise it can be handled manually.
    */
-  delete<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>): Subscription {
+  delete<T>(request?: Partial<NetHttpRequest>, callbacks?: Partial<NetHttpCallbacks<T>>, group?: string | Object): Subscription {
     const { baseUrl, url } = this.buildUrl(request);
     const options = this.buildOptions(baseUrl, request, callbacks);
 
     const subscription = this.http.request<T>(new HttpRequest<T>('DELETE', url, options))
       .subscribe(this.handleHttpEvent(request, callbacks));
 
+    this.addSubscription(subscription, group);
     return subscription;
   }
 
@@ -327,5 +350,33 @@ export class NetHttpService {
    */
   clearAllHeaders(): void {
     this.headerSettings.clear();
+  }
+
+  /**
+   * Clears all subscriptions related to the specified group.
+   * @param group Group from which to clear the subscription.
+   */
+  clearSubscriptions(group: string | Object): void {
+    if (!this.groupedSubscriptions.has(group))
+      return;
+
+    for (const subscription of this.groupedSubscriptions.get(group)!) {
+      subscription.unsubscribe();
+    }
+
+    this.groupedSubscriptions.delete(group);
+  }
+
+  /**
+   * Clears all subscriptions.
+   */
+  clearAllSubscriptions(): void {
+    for (const [group, subscriptions] of this.groupedSubscriptions.entries()) {
+      for (const subscription of subscriptions) {
+        subscription.unsubscribe();
+      }
+
+      this.groupedSubscriptions.delete(group);
+    }
   }
 }
