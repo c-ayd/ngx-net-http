@@ -3,6 +3,7 @@
  */
 
 export * from './lib/net-http.service';
+export * from './lib/net-http-service-di';
 
 export * from './lib/interfaces/net-http-request';
 export * from './lib/interfaces/net-http-callbacks';
