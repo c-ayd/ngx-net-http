@@ -23,7 +23,7 @@ export interface NetHttpRequest {
      */
     controller?: string,
     /**
-     * Routes appended to the base URL.
+     * Routes appended to the base URL. Route parameters can be added here.
      */
     routes?: (string | number | boolean)[],
     /**
@@ -39,15 +39,18 @@ export interface NetHttpRequest {
      */
     withCredentials?: boolean,
     /**
-     * Expected response from the request. The type must match with the ```callbacks``` parameter of the function (```NetHttpCallbacks<T>```).
+     * Expected response type of the request. The type must match with the HTTP function's generic type (```get<T>```, ```post<T>```, ```put<T>```, ```patch<T>```, ```delete<T>```).
+     * 
      * ### Usage Notes
-     * if ```NetHttpResponseType.ArrayBuffer``` is chosen, the callbacks' return types must be ```ArrayBuffer```.
+     * if ```NetHttpResponseType.ArrayBuffer``` is chosen, the type must be ```ArrayBuffer```.
      * 
-     * if ```NetHttpResponseType.Blob``` is chosen, the callbacks' return types must be ```Blob```.
+     * if ```NetHttpResponseType.Blob``` is chosen, the type must be ```Blob```.
      * 
-     * if ```NetHttpResponseType.Text``` is chosen, the callbacks' return types must be ```string```.
+     * if ```NetHttpResponseType.Text``` is chosen, the type must be ```string```.
      * 
-     * if ```NetHttpResponseType.Json``` is chosen or the response type is not defined, the callbacks' return types can be a user defined type.
+     * if ```NetHttpResponseType.Json``` is chosen or the response type is not defined, the type can be a user defined type.
+     * 
+     * @default NetHttpResponseType.Json
      */
     responseType?: NetHttpResponseType,
     /**
