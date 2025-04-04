@@ -1,6 +1,12 @@
 {
   "name": "ngx-net-http",
   "version": "0.0.0",
+  "description": "An HTTP library wrapping Angular's HttpClient with additional functionalities for greater ease of use",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c-ayd/ngx-net-http.git"
+  },
+  "license": "MIT",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,23 +16,23 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^19.0.0",
-    "@angular/common": "^19.0.0",
-    "@angular/compiler": "^19.0.0",
-    "@angular/core": "^19.0.0",
-    "@angular/forms": "^19.0.0",
-    "@angular/platform-browser": "^19.0.0",
-    "@angular/platform-browser-dynamic": "^19.0.0",
-    "@angular/router": "^19.0.0",
+    "@angular/animations": "^17.0.0",
+    "@angular/common": "^17.0.0",
+    "@angular/compiler": "^17.0.0",
+    "@angular/core": "^17.0.0",
+    "@angular/forms": "^17.0.0",
+    "@angular/platform-browser": "^17.0.0",
+    "@angular/platform-browser-dynamic": "^17.0.0",
+    "@angular/router": "^17.0.0",
     "karma-firefox-launcher": "^2.1.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.5",
-    "@angular/cli": "^19.0.6",
-    "@angular/compiler-cli": "^19.0.0",
+    "@angular-devkit/build-angular": "^17.0.0",
+    "@angular/cli": "^17.0.0",
+    "@angular/compiler-cli": "^17.0.0",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
@@ -34,7 +40,14 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "ng-packagr": "^19.2.0",
+    "ng-packagr": "^17.0.0",
     "typescript": "~5.6.2"
-  }
+  },
+  "keywords": [
+    "angular",
+    "http",
+    "http-client",
+    "net-http",
+    "net-http-service"
+  ]
 }

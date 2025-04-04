@@ -1,12 +1,25 @@
 {
   "name": "ngx-net-http",
-  "version": "0.0.1",
+  "version": "17.0.1",
+  "description": "An HTTP library wrapping Angular's HttpClient with additional functionalities for greater ease of use",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c-ayd/ngx-net-http.git"
+  },
+  "license": "MIT",
   "peerDependencies": {
-    "@angular/common": "16.x || 17.x || 18.x || 19.x",
-    "@angular/core": "16.x || 17.x || 18.x || 19.x"
+    "@angular/common": "^17.0.0",
+    "@angular/core": "^17.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "keywords": [
+    "angular",
+    "http",
+    "http-client",
+    "net-http",
+    "net-http-service"
+  ]
 }
