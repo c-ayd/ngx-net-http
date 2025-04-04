@@ -132,7 +132,6 @@ export class NetHttpService {
           case (HttpEventType.Response): {
             callbacks.onReceivedResponse?.(toNetHttpResponse(httpEvent));
             callbacks.onReceivedBody?.(httpEvent.body);
-            callbacks.onRequestCompleted?.();
 
             if (request?.options?.download) {
               this.startDownload(httpEvent.body, request.options.download);
@@ -146,6 +145,9 @@ export class NetHttpService {
       },
       error: (error: any) => {
         callbacks.onError?.(error);
+      },
+      complete: () => {
+        callbacks.onRequestCompleted?.();
       }
     };
   }

@@ -1,7 +1,7 @@
 import { NetHttpHeaderResponse, NetHttpResponse } from "./net-http-response";
 
 /**
- * Represents the callbacks when the HTTP response is received.
+ * Represents the callbacks when HTTP events occur.
  */
 export interface NetHttpCallbacks<T> {
     /**
@@ -14,17 +14,17 @@ export interface NetHttpCallbacks<T> {
      */
     onReceivedResponseHeader?: (headerResponse: NetHttpHeaderResponse) => void,
     /**
-     * Called when the HTTP response is received (the request is completed). This callback is invoked at the same time as ```onReceivedBody``` and ```onRequestCompleted```. The only difference is that this callback receives the entire response.
+     * Called when the HTTP response is received (the request is completed). This callback is invoked at the same time as ```onReceivedBody```. The only difference is that this callback receives the entire response.
      * @param response 
      */
     onReceivedResponse?: (response: NetHttpResponse<T>) => void,
     /**
-     * Called when the HTTP body is received (the request is completed). This callback is invoked at the same time as ```onReceivedResponse``` and ```onRequestCompleted```. The only difference is that this callback receives only the body of the response.
+     * Called when the HTTP body is received (the request is completed). This callback is invoked at the same time as ```onReceivedResponse```. The only difference is that this callback receives only the body of the response.
      * @param body 
      */
     onReceivedBody?: (body: T) => void,
     /**
-     * Called when the request is completed. This callback is invoked at the same time as ```onReceivedResponse``` and ```onReceivedBody```. The only difference is that this callback does not receive anything.
+     * Called when the `Subscription` is completed.
      */
     onRequestCompleted?: () => void,
     /**
