@@ -95,8 +95,9 @@ export class MyAuthTokenService {
     });
   }
 
-  getToken(): string | null {
-    return this.bearerToken;
+  removeToken(): void {
+    this.bearerToken = null;
+    this.netHttp.removeHeadersFromUrl('https://www.example.com', ['Authentication']);
   }
 }
 ```
