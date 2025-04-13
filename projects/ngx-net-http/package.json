@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/c-ayd/ngx-net-http.git"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "peerDependencies": {
     "@angular/common": "^18.0.0",
     "@angular/core": "^18.0.0"
